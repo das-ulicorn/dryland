@@ -4,7 +4,7 @@
 #
 # generates: ocean.dry.epub
 #
-INFILE="$(readlink -f $1)"
+INFILE=$(readlink -f "$@")
 echo $INFILE
 OUTFILE="${INFILE%.epub}.dry.epub"
 
@@ -14,8 +14,11 @@ unzip  "${INFILE}" -d ${WORKDIR}
 
 {
     cd ${WORKDIR}
+    # I've seen epubs with medtadata permission 000?!?
+    chmod --recursive u+rwX .
     rm -f oceanofpdf.com
-    sed -i -e 's_^.*oceanofpdf.*</body>_</body>_' ./O*PS/*.xhtml
+    find ./O*PS -type f -name \*.\*htm\* -exec \
+	 sed -i -e 's_^.*oceanofpdf.*</body>_</body>_' '{}' ';'
 
     zip -X0 --move "${OUTFILE}" mimetype
     zip -X9r --move "${OUTFILE}"  . -x mimetype
